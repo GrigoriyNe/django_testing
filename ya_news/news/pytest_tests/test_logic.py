@@ -15,7 +15,7 @@ NEW_COMMENT_TEXT = 'Обновлённый комментарий'
 @pytest.mark.django_db
 def test_anonymous_user_cant_create_comment(
     client, news_id_for_args
-    ):
+):
     form_data = {'text': COMMENT_TEXT}
     url = reverse('news:detail', args=news_id_for_args)
     response = client.post(url, data=form_data)
@@ -28,23 +28,23 @@ def test_anonymous_user_cant_create_comment(
 
 def test_user_cant_use_bad_words(
         author_client, news_id_for_args
-        ):
+):
     url = reverse('news:detail', args=news_id_for_args)
     bad_words_data = {'text': f'Какой-то текст, {BAD_WORDS[0]}, еще текст'}
     response = author_client.post(url, data=bad_words_data)
     comments_count = Comment.objects.count()
     assert (Comment.objects.count() == comments_count)
     assertFormError(
-            response,
-            form='form',
-            field='text',
-            errors=WARNING
-        )
+        response,
+        form='form',
+        field='text',
+        errors=WARNING
+    )
 
 
 def test_user_can_create_comment(
         author_client, author, news, news_id_for_args
-        ):
+):
     form_data = {'text': COMMENT_TEXT}
     url = reverse('news:detail', args=news_id_for_args)
     response = author_client.post(url, data=form_data)
@@ -57,7 +57,9 @@ def test_user_can_create_comment(
     assert (comment.author == author)
 
 
-def test_author_can_delete_comment(author_client, id_for_args, news_id_for_args):
+def test_author_can_delete_comment(
+        author_client, id_for_args, news_id_for_args
+):
     comments_count = Comment.objects.count()
     delete_url = reverse('news:delete', args=id_for_args)
     url = reverse('news:detail', args=news_id_for_args)
@@ -69,7 +71,7 @@ def test_author_can_delete_comment(author_client, id_for_args, news_id_for_args)
 
 def test_user_cant_delete_comment_of_another_user(
         not_author_client, id_for_args
-        ):
+):
     comments_count = Comment.objects.count()
     delete_url = reverse('news:delete', args=id_for_args)
     response = not_author_client.post(delete_url)
@@ -85,7 +87,7 @@ def test_author_can_edit_comment(author_client, comment, news):
     response = author_client.post(edit_url, data=form_data)
     assertRedirects(response, url_to_comments)
     comment.refresh_from_db()
-    assert(comment.text == NEW_COMMENT_TEXT)
+    assert (comment.text == NEW_COMMENT_TEXT)
 
 
 def test_user_cant_edit_comment_of_another_user(not_author_client, comment):
@@ -94,4 +96,4 @@ def test_user_cant_edit_comment_of_another_user(not_author_client, comment):
     response = not_author_client.post(edit_url, data=form_data)
     assert (response.status_code == HTTPStatus.NOT_FOUND)
     comment.refresh_from_db()
-    assert(comment.text == COMMENT_TEXT) 
+    assert (comment.text == COMMENT_TEXT)

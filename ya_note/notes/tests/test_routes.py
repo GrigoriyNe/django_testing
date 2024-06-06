@@ -17,7 +17,7 @@ class TestRoutes(TestCase):
             title='Zagolovok',
             text='Текст',
             author=cls.author
-            )
+        )
         cls.reader = User.objects.create(username='Читатель простой')
 
     def test_pages_availability_for_different_users(self):
@@ -27,12 +27,12 @@ class TestRoutes(TestCase):
         )
         for user, status in users_statuses:
             self.client.force_login(user)
-            for name in ('notes:edit','notes:detail', 'notes:delete'): 
+            for name in ('notes:edit', 'notes:detail', 'notes:delete'):
                 with self.subTest(user=user, name=name):
                     url = reverse(name, args=(self.note.slug,))
                     response = self.client.get(url)
                     self.assertEqual(response.status_code, status)
-    
+
     def test_redirects(self):
         login_url = reverse('users:login')
         urls = (
@@ -42,7 +42,7 @@ class TestRoutes(TestCase):
             ('notes:add', None),
             ('notes:success', None),
             ('notes:list', None),
-         )
+        )
         for name, args in urls:
             with self.subTest(name=name):
                 url = reverse(name, args=args)

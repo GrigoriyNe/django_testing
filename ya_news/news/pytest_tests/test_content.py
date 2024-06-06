@@ -20,7 +20,7 @@ def test_news_count(client):
 @pytest.mark.django_db
 def test_news_order(client):
     response = client.get(HOME_URL)
-    object_list = response.context['object_list'] 
+    object_list = response.context['object_list']
     all_dates = [news.date for news in object_list]
     sorted_dates = sorted(all_dates, reverse=True)
     assert all_dates == sorted_dates

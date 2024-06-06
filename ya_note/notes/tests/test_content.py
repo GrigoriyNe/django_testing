@@ -15,7 +15,11 @@ class TestListPage(TestCase):
     def setUpTestData(cls):
         cls.author = User.objects.create(username='Лев Толстой')
         cls.reader = User.objects.create(username='Читатель простой')
-        cls.note = Note.objects.create(title='Zagolovok', text='Текст', author=cls.author)
+        cls.note = Note.objects.create(
+            title='Zagolovok',
+            text='Текст',
+            author=cls.author
+        )
         cls.detail_url = reverse('notes:detail', args=(cls.note.slug,))
 
     def test_notes_list_for_author(self):
@@ -36,7 +40,7 @@ class TestListPage(TestCase):
         urls = (
             ('notes:edit', (self.note.slug,)),
             ('notes:add', None),
-         )
+        )
         for name, args in urls:
             with self.subTest(name=name):
                 self.url = reverse(name, args=args)
@@ -44,7 +48,7 @@ class TestListPage(TestCase):
                 response = self.client.get(self.url)
                 self.assertIn('form', response.context)
                 self.assertIsInstance(response.context['form'], NoteForm)
-                
+
                 if self.client.force_login(self.reader):
                     response = self.client.get(self.url)
                     self.assertNotIn('form', response.context)

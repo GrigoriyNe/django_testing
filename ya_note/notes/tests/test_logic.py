@@ -25,8 +25,8 @@ class TestNoteCreation(TestCase):
         self.note = Note.objects.create(
             title='Заголовок',
             text='Текст заметки',
-            author = self.author
-            )
+            author=self.author
+        )
         self.author_client.post(self.url, data=self.form_data)
         new_note = Note.objects.get()
         self.assertEqual(new_note.title, self.note.title)
@@ -46,8 +46,8 @@ class TestNoteCreation(TestCase):
         self.note = Note.objects.create(
             title='Заголовок',
             text='Текст заметки',
-            author = self.author,
-            )
+            author=self.author,
+        )
         self.form_data['slug'] = self.note.slug
         response = self.author_client.post(self.url, data=self.form_data)
         assertFormError(
@@ -55,7 +55,7 @@ class TestNoteCreation(TestCase):
             'form',
             'slug',
             errors=(self.note.slug + WARNING),
-            )
+        )
         assert Note.objects.count() == 1
 
     def test_automatic_creation_slug(self):
@@ -63,10 +63,11 @@ class TestNoteCreation(TestCase):
         self.note = Note.objects.create(
             title='Апандра',
             text='Текст заметки',
-            author = self.author
-            )
+            author=self.author
+        )
         note = Note.objects.get()
         self.assertEqual(note.slug, 'apandra')
+
 
 class TestNoteEditDelite(TestCase):
     NEW_NOTE_TEXT = 'Обновлённая заметка'
@@ -82,13 +83,13 @@ class TestNoteEditDelite(TestCase):
         cls.reader_client.force_login(cls.reader)
         cls.note = Note.objects.create(
             title='Заголовок',
-            text= 'Текст заметки',
-            author = cls.author,
-            )
+            text='Текст заметки',
+            author=cls.author,
+        )
         cls.success_url = reverse('notes:success')
-        cls.edit_url = reverse('notes:edit', args=(cls.note.slug,)) 
+        cls.edit_url = reverse('notes:edit', args=(cls.note.slug,))
         cls.delete_url = reverse('notes:delete', args=(cls.note.slug,))
-        cls.form_data = {'text': 'Текст', 'title': 'Заголовок'}   
+        cls.form_data = {'text': 'Текст', 'title': 'Заголовок'}
 
     def test_author_can_edit_note(self):
         response = self.author_client.post(self.edit_url, data=self.form_data)
