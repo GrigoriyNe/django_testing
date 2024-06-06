@@ -3,9 +3,11 @@ from http import HTTPStatus
 from django.contrib.auth import get_user_model
 from django.test import Client, TestCase
 from django.urls import reverse
+from pytest_django.asserts import assertFormError, assertRedirects
+
 from notes.forms import WARNING
 from notes.models import Note
-from pytest_django.asserts import assertFormError, assertRedirects
+
 
 User = get_user_model()
 
