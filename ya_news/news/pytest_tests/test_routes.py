@@ -56,4 +56,4 @@ def test_redirect_for_anonymous_client(
 def test_pages_availability(client, name, args):
     url = reverse(name, args=args)
     response = client.get(url)
-    assert (response.status_code == HTTPStatus.OK)
+    assert response.status_code == HTTPStatus.OK

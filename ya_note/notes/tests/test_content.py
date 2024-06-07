@@ -1,5 +1,5 @@
 from django.contrib.auth import get_user_model
-from django.test import TestCase
+from django.test import Client, TestCase
 from django.urls import reverse
 
 from notes.forms import NoteForm
@@ -15,6 +15,8 @@ class TestListPage(TestCase):
     @classmethod
     def setUpTestData(cls):
         cls.author = User.objects.create(username='Лев Толстой')
+        cls.author_client = Client()
+        cls.author_client.force_login(cls.author)
         cls.reader = User.objects.create(username='Читатель простой')
         cls.note = Note.objects.create(
             title='Zagolovok',
@@ -25,8 +27,7 @@ class TestListPage(TestCase):
 
     def test_notes_list_for_author(self):
         url = self.LIST_URL
-        self.client.force_login(self.author)
-        response = self.client.get(url)
+        response = self.author_client.get(url)
         object_list = response.context['object_list']
         assert (self.note in object_list)
 

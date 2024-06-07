@@ -22,34 +22,37 @@ def test_news_count(client):
 def test_news_order(client):
     response = client.get(HOME_URL)
     object_list = response.context['object_list']
-    all_dates = [news.date for news in object_list]
-    sorted_dates = sorted(all_dates, reverse=True)
-    assert all_dates == sorted_dates
+    dates_objects_list = [date for date in object_list]
+    sorted_dates = sorted(
+        object_list,
+        key=lambda news: news.date,
+        reverse=True
+    )
+    assert dates_objects_list == sorted_dates
 
 
 @pytest.mark.django_db
 def test_detail_page_contains_form(author_client, news, form_data):
     url = reverse('news:detail', args=(news.id,))
     response = author_client.get(url, data=form_data)
-    form = response.context['form']
-    assert 'form' in response.context
-    assert type(form) == CommentForm
+    response.context['form']
+    isinstance(response.context['form'], CommentForm)
 
 
 @pytest.mark.django_db
-def test_detail_page_contains_form_not_user(client, news):
+def test_detail_page_doesnt_contain_form_for_anonymous(client, news):
     url = reverse('news:detail', args=(news.id,))
     response = client.get(url)
     assert 'form' not in response.context
 
 
 @pytest.mark.django_db
-@pytest.mark.usefixtures('all_comments')
-def test_comments_order(client, comment, news):
+def test_comments_order(client, all_comments, news):
     detail_url = reverse('news:detail', args=(news.id,))
-    response = client.get(detail_url)
-    news = response.context['news']
-    all_comments = news.comment_set.all()
-    all_timestamps = [comment.created for comment in all_comments]
-    sorted_timestamps = sorted(all_timestamps)
-    assert all_timestamps == sorted_timestamps
+    client.get(detail_url)
+    comments = [comment for comment in all_comments]
+    sorted_comments = sorted(
+        all_comments,
+        key=lambda comment: comment.created,
+    )
+    assert comments == sorted_comments
