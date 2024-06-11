@@ -8,6 +8,8 @@ from pytest_django.asserts import assertFormError, assertRedirects
 from news.forms import BAD_WORDS, WARNING
 from news.models import Comment
 
+import random
+
 
 COMMENT_TEXT = 'Текст комментария'
 NEW_COMMENT_TEXT = 'Обновлённый комментарий'
@@ -15,7 +17,9 @@ NEW_COMMENT_TEXT = 'Обновлённый комментарий'
 
 def test_user_cant_use_bad_words(author_client, news_id_for_args):
     url = reverse('news:detail', args=news_id_for_args)
-    bad_words_data = {'text': f'Какой-то текст, {BAD_WORDS[0]}, еще текст'}
+    bad_words_data = {
+        'text': f'Какой-то текст, {random.choice(BAD_WORDS)}, еще текст'
+    }
     response = author_client.post(url, data=bad_words_data)
     comments_count = Comment.objects.count()
     assert Comment.objects.count() == comments_count
@@ -41,7 +45,7 @@ def test_anonymous_user_cant_create_comment(
 
 
 def test_user_can_create_comment(
-        author_client, author, news, news_id_for_args
+    author_client, author, news, news_id_for_args
 ):
     form_data = {'text': COMMENT_TEXT}
     url = reverse('news:detail', args=news_id_for_args)
@@ -56,7 +60,7 @@ def test_user_can_create_comment(
 
 
 def test_author_can_delete_comment(
-        author_client, id_for_args, news_id_for_args
+    author_client, id_for_args, news_id_for_args
 ):
     comments_count = Comment.objects.count()
     delete_url = reverse('news:delete', args=id_for_args)
@@ -68,7 +72,7 @@ def test_author_can_delete_comment(
 
 
 def test_user_cant_delete_comment_of_another_user(
-        not_author_client, id_for_args
+    not_author_client, id_for_args
 ):
     comments_count = Comment.objects.count()
     delete_url = reverse('news:delete', args=id_for_args)
@@ -78,7 +82,7 @@ def test_user_cant_delete_comment_of_another_user(
 
 
 def anonymous_cant_delete_comment_of_another_user(
-        client, id_for_args
+    client, id_for_args
 ):
     comments_count = Comment.objects.count()
     delete_url = reverse('news:delete', args=id_for_args)
