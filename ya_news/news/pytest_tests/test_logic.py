@@ -21,8 +21,8 @@ def test_user_cant_use_bad_words(author_client, news_id_for_args):
         'text': f'Какой-то текст, {random.choice(BAD_WORDS)}, еще текст'
     }
     response = author_client.post(url, data=bad_words_data)
-    comments_count = Comment.objects.count()
-    assert Comment.objects.count() == comments_count
+    assert response.status_code == HTTPStatus.OK
+    assert Comment.objects.count() == 0
     assertFormError(
         response,
         form='form',
@@ -38,6 +38,7 @@ def test_anonymous_user_cant_create_comment(
     form_data = {'text': COMMENT_TEXT}
     url = reverse('news:detail', args=news_id_for_args)
     response = client.post(url, data=form_data)
+    assert response.status_code == HTTPStatus.FOUND
     login_url = reverse('users:login')
     expected_url = f'{login_url}?next={url}'
     assertRedirects(response, expected_url)
@@ -51,6 +52,7 @@ def test_user_can_create_comment(
     url = reverse('news:detail', args=news_id_for_args)
     response = author_client.post(url, data=form_data)
     assertRedirects(response, f'{url}#comments')
+    assert response.status_code == HTTPStatus.FOUND
     comments_count = Comment.objects.count()
     assert comments_count == 1
     comment = Comment.objects.get()
@@ -67,6 +69,7 @@ def test_author_can_delete_comment(
     url = reverse('news:detail', args=news_id_for_args)
     url_to_comments = url + '#comments'
     response = author_client.delete(delete_url)
+    assert response.status_code == HTTPStatus.FOUND
     assertRedirects(response, url_to_comments)
     assert Comment.objects.count() == comments_count - 1
 
@@ -98,6 +101,7 @@ def test_author_can_edit_comment(author_client, comment, news):
     url_to_comments = news_url + '#comments'
     response = author_client.post(edit_url, data=form_data)
     assertRedirects(response, url_to_comments)
+    assert response.status_code == HTTPStatus.FOUND
     comment.refresh_from_db()
     assert comment.text == NEW_COMMENT_TEXT
 
