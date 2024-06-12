@@ -25,6 +25,7 @@ class TestListPage(TestCase):
         )
         cls.detail_url = reverse('notes:detail', args=(cls.note.slug,))
 
+    @classmethod
     def setUp(self):
         self.author_client = Client()
         self.author_client.force_login(self.author)
