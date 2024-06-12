@@ -50,4 +50,5 @@ class TestRoutes(TestCase):
                 url = reverse(name, args=args)
                 redirect_url = f'{login_url}?next={url}'
                 response = self.client.get(url)
+                self.assertEqual(response.status_code, HTTPStatus.FOUND)
                 self.assertRedirects(response, redirect_url)

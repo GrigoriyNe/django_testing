@@ -26,13 +26,12 @@ def test_news_order(client):
     response = client.get(HOME_URL)
     assert response.status_code == HTTPStatus.OK
     news_on_home_page = response.context['object_list']
-    news = list(news_on_home_page)
     sorted_news = sorted(
         news_on_home_page,
         key=lambda news: news.date,
         reverse=True
     )
-    assert news == sorted_news
+    assert list(news_on_home_page) == sorted_news
 
 
 @pytest.mark.django_db
@@ -40,7 +39,6 @@ def test_detail_page_contains_form(author_client, news, form_data):
     url = reverse('news:detail', args=(news.id,))
     response = author_client.get(url, data=form_data)
     assert response.status_code == HTTPStatus.OK
-    response.context['form']
     assert 'form' in response.context
     isinstance(response.context['form'], CommentForm)
 
@@ -58,9 +56,8 @@ def test_comments_order(client, all_comments, news):
     detail_url = reverse('news:detail', args=(news.id,))
     response = client.get(detail_url)
     assert response.status_code == HTTPStatus.OK
-    comments = list(all_comments)
     sorted_comments = sorted(
         all_comments,
         key=lambda comment: comment.created,
     )
-    assert comments == sorted_comments
+    assert list(all_comments) == sorted_comments

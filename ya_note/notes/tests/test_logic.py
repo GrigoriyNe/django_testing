@@ -19,12 +19,11 @@ class TestNoteCreation(TestCase):
     def setUpTestData(cls):
         cls.url = reverse('notes:add')
         cls.form_data = {'text': cls.NOTE_TEXT}
+        cls.author = User.objects.create(username='Автор заметки')
 
     def setUp(self):
-        self.author = User.objects.create(username='Автор заметки')
         self.author_client = Client()
         self.author_client.force_login(self.author)
-        self.response = self.author_client.post(self.url, data=self.form_data)
 
     def test_user_can_create_note(self):
         self.note = Note.objects.create(
@@ -44,6 +43,7 @@ class TestNoteCreation(TestCase):
 
     def test_anonymous_user_cant_create_note(self):
         response = self.client.post(self.url, data=self.form_data)
+        self.assertEqual(response.status_code, HTTPStatus.FOUND)
         self.login_url = reverse('users:login')
         self.expected_url = f'{self.login_url}?next={self.url}'
         assertRedirects(response, self.expected_url)
@@ -57,6 +57,7 @@ class TestNoteCreation(TestCase):
         )
         self.form_data['slug'] = self.note.slug
         response = self.author_client.post(self.url, data=self.form_data)
+        self.assertEqual(response.status_code, HTTPStatus.OK)
         assertFormError(
             response,
             'form',
@@ -83,8 +84,7 @@ class TestNoteEditDelite(TestCase):
     @classmethod
     def setUpTestData(cls):
         cls.author = User.objects.create(username='Автор заметки')
-        cls.author_client = Client()
-        cls.author_client.force_login(cls.author)
+        cls.reader = User.objects.create(username='Читатель')
         cls.note = Note.objects.create(
             title='Заголовок',
             text='Текст заметки',
@@ -96,12 +96,14 @@ class TestNoteEditDelite(TestCase):
         cls.form_data = {'text': 'Текст', 'title': 'Заголовок'}
 
     def setUp(self):
-        self.reader = User.objects.create(username='Читатель')
+        self.author_client = Client()
+        self.author_client.force_login(self.author)
         self.reader_client = Client()
         self.reader_client.force_login(self.reader)
 
     def test_author_can_edit_note(self):
         response = self.author_client.post(self.edit_url, data=self.form_data)
+        self.assertEqual(response.status_code, HTTPStatus.FOUND)
         self.assertRedirects(response, self.success_url)
         self.note.refresh_from_db()
         TestNoteCreation.asseretequal_all_object_note(self, self.note)
@@ -114,6 +116,7 @@ class TestNoteEditDelite(TestCase):
 
     def test_author_can_delete_note(self):
         response = self.author_client.delete(self.delete_url)
+        self.assertEqual(response.status_code, HTTPStatus.FOUND)
         self.assertRedirects(response, self.success_url)
         count = Note.objects.count()
         self.assertEqual(count, 0)
