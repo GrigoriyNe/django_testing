@@ -21,7 +21,6 @@ class TestNoteCreation(TestCase):
         cls.form_data = {'text': cls.NOTE_TEXT}
         cls.author = User.objects.create(username='Автор заметки')
 
-    @classmethod
     def setUp(self):
         self.author_client = Client()
         self.author_client.force_login(self.author)
@@ -96,7 +95,6 @@ class TestNoteEditDelite(TestCase):
         cls.delete_url = reverse('notes:delete', args=(cls.note.slug,))
         cls.form_data = {'text': 'Текст', 'title': 'Заголовок'}
 
-    @classmethod
     def setUp(self):
         self.author_client = Client()
         self.author_client.force_login(self.author)
